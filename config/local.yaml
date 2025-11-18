@@ -1,0 +1,13 @@
+dataset:
+  business_path: ./yelp_dataset/business.json
+  review_path: ./yelp_dataset/review.json
+  limit: 25000
+output:
+  base_path: ./data/output
+geo:
+  cell_size_km: 2.0
+stream:
+  batch_size: 750
+  delay_seconds: 0.1
+dashboard:
+  default_city: Las Vegas
