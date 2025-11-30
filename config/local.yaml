@@ -1,6 +1,6 @@
 dataset:
-  business_path: /data/yelp_dataset/business.json
-  review_path: /data/yelp_dataset/review.json
+  business_path: ./yelp_dataset/business.json
+  review_path: ./yelp_dataset/review.json
   limit: 25000
 source:
   type: static  # static | file_stream | kafka

@@ -91,20 +91,19 @@ pytest -q
 
 Tests cover geo bucketing, category parsing, and aggregation math atop a local Spark session.
 
-## Dockerized run (keeps dataset on host)
+## Dockerized run (dataset lives in repo)
 
-The image includes Java 17 for Spark; the Yelp dataset stays on the host and is mounted read-only at runtime.
+The image includes Java 17 for Spark. With `yelp_dataset/` in the repo root, a single bind mount is enough.
 
 - Build: `docker build -t fluffy:latest .`
-- Run the replay job inside the container, mounting code + dataset:
+- Run the replay job inside the container:
   ```
   docker run --rm \
     -v /home/ubuntu/fluffy-guacamole:/app \
-    -v /home/ubuntu/yelp_dataset:/data:ro \
     fluffy:latest \
     python -m src.streaming.review_stream --config config/local.yaml
   ```
-  Point dataset paths in `config/local.yaml` to `/data/...` when using this mount.
+  This uses `./yelp_dataset/...` from the repo (`/app/yelp_dataset/...` in the container). If your dataset lives elsewhere, mount it (e.g., `-v /data/yelp_dataset:/app/yelp_dataset:ro`) or update the paths in `config/local.yaml`.
 - Run the dashboard container on localhost only (pair with nginx or an SSH tunnel for access):
   ```
   docker run -d --name fluffy-ui \
