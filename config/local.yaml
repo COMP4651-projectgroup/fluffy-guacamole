@@ -1,0 +1,28 @@
+dataset:
+  business_path: ./yelp_dataset/business.json
+  review_path: ./yelp_dataset/review.json
+  limit: 25000
+source:
+  type: static  # static | file_stream | kafka
+  stream_path: ./data/stream/reviews
+  kafka_bootstrap_servers: localhost:9092
+  kafka_topic: reviews
+  kafka_starting_offsets: latest
+  checkpoint_path: ./data/checkpoints/review_stream
+  trigger_seconds: 5
+output:
+  base_path: ./data/output
+geo:
+  cell_size_km: 2.0
+  dense_city_threshold: 400
+analytics:
+  window_duration: "30 minutes"
+  slide_duration: "10 minutes"
+  emerging_score_threshold: 1.5
+  rating_spike_threshold: 0.5
+  min_events_for_hotspot: 5
+stream:
+  batch_size: 750
+  delay_seconds: 0.1
+dashboard:
+  default_city: Philadelphia
