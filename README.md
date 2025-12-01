@@ -21,7 +21,7 @@ src/
 config/
  └── local.yaml       # configurable dataset + geo parameters
 data/output/          # parquet tables written by the streamer
-tests/                # pytest suite (spark fixtures + unit tests)
+tests/                # pytest suite
 ```
 
 ## Prepare the app (first run)
@@ -112,3 +112,36 @@ The image includes Java 17 for Spark. With `yelp_dataset/` in the repo root, a s
     fluffy:latest \
     streamlit run src/dashboard/app.py
   ```
+
+## Nginx reverse proxy (front the dashboard)
+
+Steps on EC2 instance:
+- Install Nginx: `sudo apt-get update && sudo apt-get install -y nginx`.
+- Run the dashboard using the Docker run command above.
+- Create `/etc/nginx/sites-available/fluffy` with:
+  ```
+  server {
+      listen 80;
+      server_name _;
+
+      client_max_body_size 10m;
+
+      location / {
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+
+          proxy_pass http://127.0.0.1:8501;
+          proxy_read_timeout 300;
+          proxy_send_timeout 300;
+      }
+  }
+  ```
+- Enable: `sudo ln -s /etc/nginx/sites-available/fluffy /etc/nginx/sites-enabled/ && sudo nginx -t && sudo systemctl reload nginx`.
+- Remove the default site if needed: `sudo rm /etc/nginx/sites-enabled/default && sudo systemctl reload nginx`.
+- Security groups: allow inbound 80/443; keep 8501 closed (only Nginx reaches it).
+- Reload Nginx after config changes: `sudo systemctl reload nginx`.
